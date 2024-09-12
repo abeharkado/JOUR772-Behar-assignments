@@ -239,4 +239,4 @@ No code here; I want you to provide three questions that this data suggests to y
 
 2.  What department offers the most classes by year or term?
 
-3.  How many professors teach each class/sections of each class?
+3.  How many professors teach each class/sections of each class? Are there many sections offered?
