@@ -1,0 +1,151 @@
+---
+title: "lab_02"
+author: "Derek Willis"
+adapted by: "Daniel Trielli"
+date: "2024-05-23"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Load libraries and establish settings
+
+```{r}
+# Turn off scientific notation
+options(scipen=999)
+
+# Load the tidyverse. If you have not installed the tidyverse already, remove the # from the next line and run it first.  
+# install.packages('tidyverse')
+library(tidyverse)
+library(lubridate)
+```
+
+## Load Data
+
+Let's keep working with the UMD courses and Maryland campaign expense data we used in the pre_lab.
+
+```{r}
+umd_courses <- read_rds("data/umd_courses.rds")
+maryland_expenses <- read_csv("data/maryland_expenses.csv")
+```
+
+## Answer questions
+
+### **Q1** How many departments have offered the courses with "Climate" in the title and at least one seat? Which department has offered the most?
+
+```{r}
+umd_courses |> 
+  filter(str_detect(title, "Climate"))|> 
+  filter(seats>= 1)|> 
+  group_by(department)|> 
+    
+  summarise(count= n()) |>
+  arrange(desc(count))
+
+```
+
+**A1: 26 departments offer classes with "Climate" in the title and the Department of Atmospheric and Oceanic Science offers the most (68).**
+
+------------------------------------------------------------------------
+
+### **Q2** Which departments have the most courses in the Fall 2023 term? And which departments in that term have at least one syllabus posted? How are the top departments different in each result? Where is Journalism in those results?
+
+```{r}
+umd_courses |> 
+  filter(term=='202308')|>
+  filter(syllabus_count>=1)|>
+  group_by(department)|>
+
+  summarise(count= n()) |>
+  arrange(desc(count))
+
+```
+
+**A2: The Business and Management Department, School of Music and English Department have the most courses in Fall 2023. The Business and Management Department, Economics Department and School of Music come out on top when filtering for at least 1 syllabus. The top departments shift quite a bit when adding the filter for syllabus count but the Business and Management Department and School of Music still remain in the top 3. Journalism comes out as 6th in the first query and 38th in the second query.**
+
+------------------------------------------------------------------------
+
+### **Q3** Using the Maryland campaign expenses data, change the datatype of the expenditure_date column so that it is a date and not a chr. Then create a new column for the month based on expenditure_date. Then write code that shows total amount spent each month by Wes Moore's committee (you'll need to search the data to find the exact name). Write a sentence describing the pattern of spending over time.
+
+```{r}
+maryland_expenses <- maryland_expenses |> mutate(expenditure_date=mdy(expenditure_date))
+
+head(maryland_expenses)
+maryland_expenses |>
+  filter(committee_name=='Moore  Wes For Maryland')|>  
+  mutate(month = floor_date(expenditure_date, "month")) |>
+  group_by(month) |>
+  summarise(total_amount = sum(amount)) |>
+  arrange(desc(month))
+  
+```
+
+{r} maryland_expenses \<- maryland_expenses \|\> mutate(expenditure_date=mdy(expenditure_date))
+
+head(maryland_expenses)
+
+**A3: The total expenditure to the Wes Moore campaign increased significantly from the previous year. There was a prominent hike in the expenditure in the summer months of 2022.**
+
+------------------------------------------------------------------------
+
+### **Q4** Using case_when(), create a column in the Maryland expenses data called `spending_location` indicating whether each record indicated money spent in Maryland or outside Maryland. For records that are in Maryland, make the new column's value "In-state" and for the others, make it "Out of state". Then write code that shows the total amount of money spent in each category and describe the results. You can do this in one statement or break it up into two statements (saving the new column to your dataframe).
+
+```{r}
+spending_location <- maryland_expenses |>
+  mutate(
+    state = case_when(
+        str_detect(address, " Maryland ") ~ "In-state",
+        str_detect(address, " California ") ~ "Out of state",
+        str_detect(address, " Washington ") ~ "Out of state",
+        str_detect(address, " Louisiana ") ~ "Out of state",
+        str_detect(address, " Florida ") ~ "Out of state",
+        str_detect(address, " North Carolina ") ~ "Out of state",
+        str_detect(address, " Massachusetts ") ~ "Out of state",
+        str_detect(address, " West Virginia ") ~ "Out of state",
+        str_detect(address, " Virginia ") ~ "Out of state",
+        .default = NA
+      )
+  )
+
+ spending_location |>
+   group_by(state)|>
+
+  summarise(count= n()) |>
+  arrange(desc(count))
+```
+
+**A4: The majority of the expenditures are in-state spending. Out of state expenditures did account for a substantial amount of money. There is also a good amount of money that is not categorized.**
+
+------------------------------------------------------------------------
+
+### **Q5** Choose your own adventure: using either the UMD courses or campaign expenses data, ask and answer a question that is different than the previous ones. You can use one of the ones you provided in the pre_lab.
+
+1.  How much is each state spending on campaigns?
+
+```{r}
+ spending_location <- maryland_expenses |>
+  
+  mutate(
+    state = case_when(
+        str_detect(address, " Maryland ") ~ "MD",
+        str_detect(address, " California ") ~ "CA",
+        str_detect(address, " Washington ") ~ "WA",
+        str_detect(address, " Louisiana ") ~ "LA",
+        str_detect(address, " Florida ") ~ "FL",
+        str_detect(address, " North Carolina ") ~ "NC",
+        str_detect(address, " Massachusetts ") ~ "MA",
+        str_detect(address, " West Virginia ") ~ "WV",
+        str_detect(address, " Virginia ") ~ "VA",
+        .default = NA
+      )
+  )
+ filter(expense_category=='Campaign')|> 
+   group_by(state)|>
+
+  summarise(count= n()) |>
+  arrange(desc(count))
+```
+
+**A5: I really did try my best here but the last error said object 'expense_category' not found and I am really confused. But my idea here was to mutate the column with the state abbreviations, filter the expense category for any entry that contained the word 'campaign' and then summarize the data into how much each state spends on campaigns.**
