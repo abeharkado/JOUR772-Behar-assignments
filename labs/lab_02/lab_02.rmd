@@ -37,8 +37,7 @@ maryland_expenses <- read_csv("data/maryland_expenses.csv")
 
 ```{r}
 umd_courses |> 
-  filter(str_detect(title, "Climate"))|> 
-  filter(seats>= 1)|> 
+  filter(str_detect(title, "Climate") & seats>= 1)|> 
   group_by(department)|> 
     
   summarise(count= n()) |>
