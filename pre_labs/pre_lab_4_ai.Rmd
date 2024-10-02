@@ -138,3 +138,5 @@ filter_response
 ```
 
 **Your comment:**
+
+Personally, i find the answer just a bit hard to decipher because of the formatting. While, from what I can tell, the response was accurate and concise in its explanation, I think I prefer to ask for help from a person, not AI.
