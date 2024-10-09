@@ -162,7 +162,7 @@ earthquakes <- earthquakes |>
 
 ```
 
-**A11:**
+**A11: you can mutate into a new column putting a case_when function for any mag that is above 3 to come out as 'serious' and default the rest to 'not serious'.**
 
 ------------------------------------------------------------------------
 
@@ -178,11 +178,20 @@ earthquakes <- earthquakes |>
 
 #### EXTRA Q What other questions are you interested in and how would you ask them in R?
 
-```{r}
+What network reports the most earthquakes?
 
+```{r}
+earthquakes |>
+  group_by(locationSource) |>
+  summarize (total = n()) |>
+  arrange(desc(total))
 ```
 
-```{r}
+```{Are there observations that have a mag error larger than 0.5?}
+
+{r}
+earthquakes |>
+  filter(magError > 0.5)
 
 ```
 
