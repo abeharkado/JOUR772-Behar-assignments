@@ -55,14 +55,50 @@ In this notebook, we are reverse engineering five sentences from the story.
 ### Sentence 1
 
 -   **Sentence text**: Those states saw private-school enrollment grow by over 100,000 students. Home-schooling grew even more, surging by more than 180,000.
--   **Analysis summary**: It seems as though they compared the 2021-2022 to the 2019-2020 school year which would alter the results. There was a decrease in enrollment during the 2020-2021 school year but and increase of over 200,000 students the next year.
+-   **Analysis summary**:
 
 ```{r}
 # Put code to reverse engineer sentence here
-priv_enroll_by_grade|>
+states_used_priv_enroll <- priv_enroll_by_grade |> 
+  filter(grade == "k_12_total")|>
+   mutate(
+    used = case_when(
+        str_detect(state, "CA") ~ "True",
+        str_detect(state, "NY") ~ "True",
+        str_detect(state, "LA") ~ "True",
+        str_detect(state, "NC") ~ "True",
+        str_detect(state, "WA") ~ "True",
+        str_detect(state, "CO") ~ "True",
+        str_detect(state, "GA") ~ "True",
+        str_detect(state, "MN") ~ "True",
+        str_detect(state, "WI") ~ "True",
+        str_detect(state, "NH") ~ "True",
+        str_detect(state, "MA") ~ "True",
+        str_detect(state, "MT") ~ "True",
+        str_detect(state, "DE") ~ "True",
+        str_detect(state, "ND") ~ "True",
+        str_detect(state, "DC") ~ "True",
+        str_detect(state, "SD") ~ "True",
+        str_detect(state, "SC") ~ "True",
+        str_detect(state, "NE") ~ "True",
+        str_detect(state, "RI") ~ "True",
+        str_detect(state, "TN") ~ "True",
+        str_detect(state, "PA") ~ "True",
+        str_detect(state, "FL") ~ "True",
+        .default = "FALSE"
+      )
+  )
+  
+  
+  
+
+states_used_priv_enroll |> 
+  filter(used == "True") |>
   group_by(sch_year)|>
-  summarise(total = sum(enrollment, na.rm = TRUE)) |>
+  summarize(total = sum(enrollment, na.rm = TRUE)) |>
   arrange (desc(total))
+
+
 
 # Display results of code below this codeblock
 
@@ -71,16 +107,52 @@ priv_enroll_by_grade|>
 ### Sentence 2
 
 -   **Sentence text**: Overall, public school enrollment fell by over 700,000 students between the 2019-2020 and 2021-2022 school years in the 21 states plus Washington, D.C., that provided the necessary data.
--   **Analysis summary**: While the statement that public school enrollment fell during those school years, it feel by a lot more than 700,000 students and closer to 2 million students.
+-   **Analysis summary**:
 
 ```{r}
 # Put code to reverse engineer sentence here
 
-pub_enroll_by_grade |> 
+states_used_pub_enroll <- pub_enroll_by_grade |> 
+  filter(grade == "k_12_total")|>
+   mutate(
+    used = case_when(
+        str_detect(st, "CA") ~ "True",
+        str_detect(st, "NY") ~ "True",
+        str_detect(st, "LA") ~ "True",
+        str_detect(st, "NC") ~ "True",
+        str_detect(st, "WA") ~ "True",
+        str_detect(st, "CO") ~ "True",
+        str_detect(st, "GA") ~ "True",
+        str_detect(st, "MN") ~ "True",
+        str_detect(st, "WI") ~ "True",
+        str_detect(st, "NH") ~ "True",
+        str_detect(st, "MA") ~ "True",
+        str_detect(st, "MT") ~ "True",
+        str_detect(st, "DE") ~ "True",
+        str_detect(st, "ND") ~ "True",
+        str_detect(st, "DC") ~ "True",
+        str_detect(st, "SD") ~ "True",
+        str_detect(st, "SC") ~ "True",
+        str_detect(st, "NE") ~ "True",
+        str_detect(st, "RI") ~ "True",
+        str_detect(st, "TN") ~ "True",
+        str_detect(st, "PA") ~ "True",
+        str_detect(st, "FL") ~ "True",
+        .default = "FALSE"
+      )
+  )
+  
+  
+  
+
+states_used_pub_enroll |> 
+  filter(used == "True") |>
   group_by(sch_year)|>
   summarize(total = sum(enrollment, na.rm = TRUE)) |>
   arrange (desc(total))
-    
+
+
+
 
 # Display results of code below this codeblock
 
@@ -96,6 +168,8 @@ pub_enroll_by_grade |>
 
 # Display results of code below this codeblock
 
+
+24786224	-24081631
 ```
 
 ### Sentence 4
