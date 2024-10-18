@@ -87,7 +87,7 @@ Add a column to your code that calculates the number of calls per 1,000 people f
 
 Which zip code has the highest rate of calls per 1,000 people? Find the neighborhoods in that zip code that are listed in the data - you can use group_by or distinct to do this. What are some of those neighborhoods?
 
-A3. The zip code with the most calls was 21217 with 774 calls and only 7 observations fit that criteria. The zipcode with the highest rate of calls per 1000 people is 21251
+A3. The zip code with the most calls was 21217 with 774 calls and only 7 observations fit that criteria. The zipcode with the highest rate of calls per 1000 people is also 2127 and the neighborhoods Penn North, Sandtown-Winchester and Upton are the ones with the most calls.
 
 ```{r}
 under_18 <- baltimore_and_demographics |> 
@@ -96,8 +96,8 @@ under_18 <- baltimore_and_demographics |>
 baltimore_and_demographics |> 
   group_by(zip_code, population) |>
   summarize (total = n()) |>
-  arrange(desc(total)) |>
-  mutate(per_cap = (total/population)*1000)
+  mutate(per_cap = (total/population)*1000)|>
+  arrange(desc(per_cap))
 
 
 
