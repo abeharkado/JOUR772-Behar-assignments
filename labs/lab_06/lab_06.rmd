@@ -100,7 +100,6 @@ baltimore_and_demographics |>
   arrange(desc(per_cap))
 
 
-
 under_18 |>
   filter (zip_code == "21217")|>
   group_by (neighborhood)|>
