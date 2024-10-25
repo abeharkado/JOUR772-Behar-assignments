@@ -29,6 +29,7 @@ library(tidyverse)
 library(lubridate)
 library(janitor)
 library(dplyr)
+
 ```
 
 ## Load and Cleaning Data
@@ -40,6 +41,7 @@ In this section, describe the source of the data, write a basic data dictionary 
  pop_by_age <-read_csv("data/population-by-age.csv")
 pub_enroll_by_grade <- read_csv("data/public-enrollment-by-grade.csv")
 priv_enroll_by_grade <- read_csv("data/private-enrollment-by-grade.csv")
+summary <- read_csv("data/Missing-Kids-Summary-File.csv")|>clean_names()
 
 # Path to data should be loaded from folder "data" i.e. read_csv("data/name_of_data.csv")
 
@@ -160,16 +162,49 @@ states_used_pub_enroll |>
 
 ### Sentence 3
 
--   **Sentence text**: [Paste in sentence to engineer here]
+-   **Sentence text**: The number of children registered for home-schooling surged by **around 184,000**.
 -   **Analysis summary**: [Write up two to three sentences describing the results of your analysis. Were you able to confirm the finding? If not, why not?]
 
 ```{r}
 # Put code to reverse engineer sentence here
 
+homeschool <- summary|>
+  filter(enrollment_type == "Homeschool enrollment")|>
+  mutate(
+    used = case_when(
+        str_detect(state_abbrev, "CA") ~ "True",
+        str_detect(state_abbrev, "NY") ~ "True",
+        str_detect(state_abbrev, "LA") ~ "True",
+        str_detect(state_abbrev, "NC") ~ "True",
+        str_detect(state_abbrev, "WA") ~ "True",
+        str_detect(state_abbrev, "CO") ~ "True",
+        str_detect(state_abbrev, "GA") ~ "True",
+        str_detect(state_abbrev, "MN") ~ "True",
+        str_detect(state_abbrev, "WI") ~ "True",
+        str_detect(state_abbrev, "NH") ~ "True",
+        str_detect(state_abbrev, "MA") ~ "True",
+        str_detect(state_abbrev, "MT") ~ "True",
+        str_detect(state_abbrev, "DE") ~ "True",
+        str_detect(state_abbrev, "ND") ~ "True",
+        str_detect(state_abbrev, "DC") ~ "True",
+        str_detect(state_abbrev, "SD") ~ "True",
+        str_detect(state_abbrev, "SC") ~ "True",
+        str_detect(state_abbrev, "NE") ~ "True",
+        str_detect(state_abbrev, "RI") ~ "True",
+        str_detect(state_abbrev, "TN") ~ "True",
+        str_detect(state_abbrev, "PA") ~ "True",
+        str_detect(state_abbrev, "FL") ~ "True",
+        .default = "FALSE"
+      )
+  )
+
+homeschool|>
+  filter(used == "True") |>
+  summarize(total = sum(total_change, na.rm = TRUE)) |>
+  arrange (desc(total))
+
 # Display results of code below this codeblock
 
-
-24786224	-24081631
 ```
 
 ### Sentence 4
