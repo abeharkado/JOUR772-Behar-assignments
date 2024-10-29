@@ -24,6 +24,8 @@ You'll need to load two packages for this: the tidyverse and tidycensus.
 options(scipen=999)
 
 # Load the tidyverse.
+library(tidyverse)
+library(tidycensus)
 ```
 
 ## Setup Census API
@@ -50,20 +52,29 @@ v21 <- load_variables(2021, "acs5", cache=TRUE)
 #### **Q1** What is the Maryland jurisdiction with the lowest median age, according to the ACS 2021 5-year estimates? You will need to find the variable for median age first (search for it in the 'concept' column at the data frame we just created).
 
 ```{r}
-
+md_juris <- get_acs(geography = "county",
+                     variables = c(medage= "B01002_001"),
+                     state = "MD",
+                     year = 2021)
 ```
 
-**Answer here:**
+**Answer here: Baltimore City has the lowest median age.**
 
 ------------------------------------------------------------------------
 
 #### **Q2** Which Maryland counties have a median age of at least 50? You can use the dataframe you just made to answer this, but you must write code to display only those counties with a median age of at least 50. **A2**
 
 ```{r}
+md_county <- get_acs(geography = "county",
+                     variables = c(medage= "B01002_001"),
+                     state = "MD",
+                     year = 2021)|>
+  filter(estimate >= 50)|>
+  arrange(desc(estimate))
 
 ```
 
-**Answer here:**
+**Answer here: Talbot County** **and Worcester County have a median age of at least 50.**
 
 ------------------------------------------------------------------------
 
@@ -79,22 +90,45 @@ v21 <- load_variables(2021, "acs5", cache=TRUE)
 Which zip code has the highest rate of calls? Which has the lowest?
 
 ```{r}
+#Load MOCO 911 data
+moco911<- read_csv("data/montgomery_2022_overdoses.csv")|> clean_names()|>
+  group_by(zip)|>
+  summarize (total = n()) |>
+  arrange(desc(total))|>
+  rename(GEOID = zip)|>
+  mutate(GEOID = as.character(GEOID))
+
+#Load ACS data
+md_pop <- get_acs(geography = "zcta",
+                     variables = c(adult_pop= "B09021_001"),
+                     state = "MD",
+                     year = 2019)
+#join
+moco_pop<-inner_join(moco911, md_pop, by=c("GEOID")) |>
+  rename(adult_pop=estimate)|>
+  mutate(per_cap = ((total/adult_pop)*1000)) |>
+  arrange(desc(per_cap))
+
 ```
 
-**Answer here:**
+**Answer here: The zipcode with the highest rate of calls is 20877. The one with the lowest is 20707.**
 
 ------------------------------------------------------------------------
 
 #### **Q4** Using [CensusReporter.org](https://censusreporter.org/), examine the zip codes on Q3 with the highest and lowest rates and compare and contrast their demographic profiles. Is there a story here?
 
-**Answer here:**
+**Answer here: The zipcode with the lowest number of calls has a higher median household and per capita income. It also has a lower percent of the population under the poverty line and a higher overall educational attainment rate. I think there could be a story here.**
 
 ------------------------------------------------------------------------
 
 #### **Q5** Go back to your joined dataframe from Q3 and add two more columns representing the minimum and maximum populations based on the estimate and margin of error, then calculate per capita rates for each. Do you get the same two zip codes for the highest and lowest as you did before? Does that give you more or less confidence in your answers to Q3?
 
 ```{r}
-
+moco_pop<- moco_pop|>
+  mutate(min_pop=(adult_pop-moe))|>
+  mutate(max_pop=(adult_pop+moe))|>
+  mutate(per_cap_min = ((total/min_pop)*1000)) |>
+  mutate(per_cap_max = ((total/max_pop)*1000))
 ```
 
-**Answer here:**
+**Answer here: When arranging the minimum population and for maximum population based on the margin of error and estimate, we still get the same zipcodes as before. It does give me more confidence in my answers for Q3.**
