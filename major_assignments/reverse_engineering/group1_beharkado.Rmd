@@ -18,7 +18,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Introduction
 
-In this notebook, we are reverse engineering the story, [STORY NAME](STORY%20URL)
+In this notebook, we are reverse engineering the story, [**Thousands of kids are missing from school. Where did they go?**](https://projects.apnews.com/features/2023/missing-children/index.html)
 
 ## Load libraries
 
@@ -41,7 +41,7 @@ In this section, describe the source of the data, write a basic data dictionary 
  pop_by_age <-read_csv("data/population-by-age.csv")
 pub_enroll_by_grade <- read_csv("data/public-enrollment-by-grade.csv")
 priv_enroll_by_grade <- read_csv("data/private-enrollment-by-grade.csv")
-summary <- read_csv("data/Missing-Kids-Summary-File.csv")|>clean_names()
+summary <- read_csv("data/summary.csv")|>clean_names()
 
 # Path to data should be loaded from folder "data" i.e. read_csv("data/name_of_data.csv")
 
@@ -56,8 +56,8 @@ In this notebook, we are reverse engineering five sentences from the story.
 
 ### Sentence 1
 
--   **Sentence text**: Those states saw private-school enrollment grow by over 100,000 students. Home-schooling grew even more, surging by more than 180,000.
--   **Analysis summary**:
+-   **Sentence text**: Those states saw private-school enrollment grow by over 100,000 students.
+-   **Analysis summary**:This is a follow up on the previous sentence, but this one discusses private schools. The code to solve this one is pretty much identical, but did take checking some slightly altered column names compared to the public school data. When subtracting the 2021-22 enrollment from the 2019-20, we get -102,847. That in fact means that there was an increase of just over 100,000 in the total private school enrollment. That exactly lines up with the AP story.
 
 ```{r}
 # Put code to reverse engineer sentence here
@@ -100,8 +100,7 @@ states_used_priv_enroll |>
   summarize(total = sum(enrollment, na.rm = TRUE)) |>
   arrange (desc(total))
 
-
-
+2435491-2332644	
 # Display results of code below this codeblock
 
 ```
@@ -109,7 +108,7 @@ states_used_priv_enroll |>
 ### Sentence 2
 
 -   **Sentence text**: Overall, public school enrollment fell by over 700,000 students between the 2019-2020 and 2021-2022 school years in the 21 states plus Washington, D.C., that provided the necessary data.
--   **Analysis summary**:
+-   **Analysis summary**:After several attempts to figure out how to sort through some confusingly structured data, we figured out how the AP reached the claim in 700,000 students gone from public school enrollment from 2019-2020 to 2021-22. After mutating and filtering the data, we produced a summary that showed total enrollment in the 21 states plus DC that the AP used for its analysis, based on the above sentence. We then subtracted the 2021-22 total enrollment from the 2019-20 and got 704,593. That lines up with the sentence in the AP style saying enrollment declined by "over 700,000"
 
 ```{r}
 # Put code to reverse engineer sentence here
@@ -154,7 +153,7 @@ states_used_pub_enroll |>
   arrange (desc(total))
 
 
-
+24081631-24786224	
 
 # Display results of code below this codeblock
 
@@ -163,10 +162,11 @@ states_used_pub_enroll |>
 ### Sentence 3
 
 -   **Sentence text**: The number of children registered for home-schooling surged by **around 184,000**.
--   **Analysis summary**: [Write up two to three sentences describing the results of your analysis. Were you able to confirm the finding? If not, why not?]
+-   **Analysis summary**: The missing student data came from a compilation of enrollment changes at public school, private school and home school. We previously calculated public and private schools, now we complete it with home schools students. We took the same approach that was used for previous questions, but this data set was incorporated into the summary file for the data instead of in its own table. So this took an extra step of filtering. Once that was completed, we were able to calculate the exact difference in enrollment by summarizing the sums of the 2021-22 school year enrollment and 2019-20 and then finding the difference. That math resulted in the same number the AP story had: around 184,000.
 
 ```{r}
 # Put code to reverse engineer sentence here
+
 
 homeschool <- summary|>
   filter(enrollment_type == "Homeschool enrollment")|>
@@ -209,11 +209,101 @@ homeschool|>
 
 ### Sentence 4
 
--   **Sentence text**: [Paste in sentence to engineer here]
+-   **Sentence text**: But the data showed 230,000 students who were neither in private school nor registered for home-school. Their absences could not be explained by population loss, either – such as falling birth rates or families who moved out of state.
 -   **Analysis summary**: [Write up two to three sentences describing the results of your analysis. Were you able to confirm the finding? If not, why not?]
 
 ```{r}
 # Put code to reverse engineer sentence here
+school_population <- read_csv('data/Missing-Kids-Summary-File.csv') |> clean_names()
+
+counted_population <- school_population |> mutate(
+    counted_state = case_when(
+        str_detect(state, "California") ~ "TRUE",
+        str_detect(state, "New York") ~ "TRUE",
+        str_detect(state, "Louisiana") ~ "TRUE",
+        str_detect(state, "North Carolina") ~ "TRUE",
+        str_detect(state, "Washington") ~ "TRUE",
+        str_detect(state, "Colorado") ~ "TRUE",
+        str_detect(state, "Georgia") ~ "TRUE",
+        str_detect(state, "Minnesota") ~ "TRUE",
+        str_detect(state, "Wisconsin") ~ "TRUE",
+        str_detect(state, "New Hampshire") ~ "TRUE",
+        str_detect(state, "Massachusetts") ~ "TRUE",
+        str_detect(state, "Montana") ~ "TRUE",
+        str_detect(state, "Delaware") ~ "TRUE",
+        str_detect(state, "North Dakota") ~ "TRUE",
+        str_detect(state, "District of Columbia") ~ "TRUE",
+        str_detect(state, "South Dakota") ~ "TRUE",
+        str_detect(state, "South Carolina") ~ "TRUE",
+        str_detect(state, "Nebraska") ~ "TRUE",
+        str_detect(state, "Rhode Island") ~ "TRUE",
+        str_detect(state, "Tennessee") ~ "TRUE",
+        str_detect(state, "Pennsylvania") ~ "TRUE",
+        str_detect(state, "Florida") ~ "TRUE",
+        .default = "FALSE",
+    )
+  ) 
+
+
+edit_private <- states_used_priv_enroll |> mutate(
+  state = case_when(
+        str_detect(state, "CA") ~ "CALIFORNIA",
+        str_detect(state, "NY") ~ "NEW YORK",
+        str_detect(state, "LA") ~ "LOUISIANA",
+        str_detect(state, "NC") ~ "NORTH CAROLINA",
+        str_detect(state, "WA") ~ "WASHINGTON",
+        str_detect(state, "CO") ~ "COLORADO",
+        str_detect(state, "GA") ~ "GEORGIA",
+        str_detect(state, "MN") ~ "MINNESOTA",
+        str_detect(state, "WI") ~ "WISCONSIN",
+        str_detect(state, "NH") ~ "NEW HAMPSHIRE",
+        str_detect(state, "MA") ~ "MASSACHUSETTS",
+        str_detect(state, "MT") ~ "MONTANA",
+        str_detect(state, "DE") ~ "DELAWARE",
+        str_detect(state, "ND") ~ "NORTH DAKOTA",
+        str_detect(state, "DC") ~ "DISTRICT OF COLUMBIA",
+        str_detect(state, "SD") ~ "SOUTH DAKOTA",
+        str_detect(state, "SC") ~ "SOUTH CAROLINA",
+        str_detect(state, "NE") ~ "NEBRASKA",
+        str_detect(state, "RI") ~ "RHODE ISLAND",
+        str_detect(state, "TN") ~ "TENNESSEE",
+        str_detect(state, "PA") ~ "PENNSYLVANIA",
+        str_detect(state, "FL") ~ "FLORIDA",
+        .default = "FALSE",
+    )
+  ) 
+
+Y19_privates <- edit_private |> filter(used == "True", sch_year == "2019-2020")
+
+Y21_privates <- edit_private |> filter(used == "True", sch_year == "2021-2022")
+
+join_privates <- Y19_privates |> left_join(Y21_privates, join_by(state)) 
+
+joined_privates <- join_privates |> mutate(private_change = enrollment.y - enrollment.x)
+
+Y19_publics <- states_used_pub_enroll |> filter(used == "True", sch_year == "2019-2020")
+
+Y21_publics <- states_used_pub_enroll |> filter(used == "True", sch_year == "2021-2022")
+
+join_publics <- Y19_publics |> left_join(Y21_publics, join_by(state))
+
+joined_publics <- join_publics |> mutate(public_change = enrollment.y - enrollment.x)
+
+caps_homeschool <- homeschool |> mutate(state = str_to_upper(state))
+
+counted_population_caps <- counted_population |> mutate(state = str_to_upper(state))
+
+all_joined_data <- joined_privates |> 
+  left_join(joined_publics, join_by(state)) |> 
+  left_join(caps_homeschool, join_by(state)) |>
+  left_join(counted_population_caps, join_by(state))
+
+missing <- all_joined_data |> 
+  mutate(residual = (private_change + public_change + total_change - change_in_school_aged_population_5_17))
+
+missing |> summarize(sum(residual))
+
+
 
 # Display results of code below this codeblock
 
@@ -226,7 +316,41 @@ homeschool|>
 
 ```{r}
 # Put code to reverse engineer sentence here
+pub_enroll_by_grade <- read_csv("data/public-enrollment-by-grade.csv")
+priv_enroll_by_grade <- read_csv("data/private-enrollment-by-grade.csv")
 
+public_enroll_19 <- pub_enroll_by_grade |> 
+  filter(grade == "k_12_total")|>
+  filter(sch_year == "2019-2020")
+
+public_enroll_21 <- pub_enroll_by_grade |> 
+  filter(grade == "k_12_total")|>
+  filter(sch_year == "2021-2022")
+  
+  
+private_enroll_19 <- priv_enroll_by_grade |> 
+  filter(grade == "k_12_total")|>
+  filter(sch_year == "2019-2020")
+
+private_enroll_21 <- priv_enroll_by_grade |> 
+  filter(grade == "k_12_total")|>
+  filter(sch_year == "2021-2022")
+
+
+public_19_21 <- public_enroll_19 |> left_join(public_enroll_21, join_by(state)) |>
+  mutate(public_change = enrollment.y - enrollment.x)
+
+
+private_19_21 <- private_enroll_19 |> left_join(private_enroll_21, join_by(state)) |>
+  mutate(private_change = enrollment.y - enrollment.x)
+
+
+
+
+simple_summary <- summary |> 
+  select(state, enrollment_type, school_year_2019_20, school_year_2021_22)
+
+complete_df <- inner_join(school_population, simple_summary, join_by(state))
 # Display results of code below this codeblock
 
 ```
