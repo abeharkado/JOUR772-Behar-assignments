@@ -281,12 +281,12 @@ Those are a little hard to read, so we can turn them 45 degrees to remove the ov
 
 ```{r}
 md_winred_by_date |>
-  ggplot() + 
-  geom_line(aes(x=date, y=total_contributions)) + 
-  scale_x_date(date_breaks = "1 week", date_labels = "%b %d") +
-  theme(
-    axis.text.x = element_text(angle = 45,  hjust=1)
-  )
+      ggplot() + 
+      geom_line(aes(x=date, y=total_contributions)) + 
+      scale_x_date(date_breaks = "1 week", date_labels = "%b %d") +
+      theme(
+        axis.text.x = element_text(angle = 45,  hjust=1)
+      )
 
 ```
 
