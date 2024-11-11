@@ -120,6 +120,7 @@ dems_fred <- md_absentee_ballots_date |>
 
 dems_fred |>
   ggplot() + 
+  geom_line(aes(x=date, y= total_received, color= "Total"))+
   geom_line(aes(x=date, y= dem_received, color="Democrats"))+
   geom_line(aes(x=date, y= rep_received, color="Republican"))+ 
   geom_line(aes(x=date, y= oth_received, color="Other"))+
@@ -180,4 +181,19 @@ md_absentee_ballots|>
     caption = "Source: Maryland State Board of Elections"
 )
   
+```
+
+```{r}
+md_absentee_ballots|>
+  ggplot()+
+  geom_point(aes(x=rep_sent, y=rep_received)) +
+  geom_text(aes(x=rep_sent, y=rep_receiyved, label = county_name), check_overlap = TRUE)+
+  geom_smooth(method = lm, aes(x = rep_sent, y = rep_received))+
+  labs(
+    title="Anne ARundel Leads GOP in Returned Ballots",
+    subtitile= "Montgomery County Republicans trail behind other counties",
+    x="ballots sent",
+    y="ballots returned",
+    caption= "source: Maryland State Board of Elections"
+  )
 ```
