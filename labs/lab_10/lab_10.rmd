@@ -81,6 +81,11 @@ county_outages<- read_csv("data/county_outages_march2023.csv")|>
   clean_names()|>
   mutate(rate= (outage_customers/total_customers)*10000)
 
+md_counties_fixed <- md_counties_fixed|> mutate (NAME = case_when
+                                           NAMELSAD == 'Baltimore city' ~ 'Baltimore City',
+                                           .default = NAME)
+)
+
 ```
 
 ```{r}
