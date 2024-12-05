@@ -127,9 +127,33 @@ turnout_county <- turnout |>
 
 ```{r}
 #Based on current voting data, how might voting patterns in Maryland change in upcoming elections?
+elect_2008 <- elect_2008|>
+  select(party, percentage)
+elect_2012 <- elect_2012|>
+  select(party, percentage)
+elect_2016 <- elect_2016|>
+  select(party, percentage)
+elect_2020 <- elect_2020|>
+  select(party, percentage)
+elect_2024 <- md_pres_vice_data|>
+  select(party, percentage)
 
-patterns <- md_pres_vice_data |>
 
+patterns <- elect_2008 |>
+  inner_join(elect_2012, by="party")|>
+  rename(elect_2008 = percentage.x)|>
+  rename(elect_2012 = percentage.y)|>
+  inner_join(elect_2016, by="party")|>
+  rename(elect_2016 = percentage)|>
+  inner_join(elect_2020, by="party")|>
+  rename(elect_2020 = percentage)|>
+  inner_join(elect_2024, by="party")|>
+  rename(elect_2024 = percentage)
+
+patterns <- patterns|>
+  mutate(prediction = elect_2008+elect_2012+elect_2016+elect_2020+elect_2024)
+  
+  
 
 
 ```
