@@ -85,7 +85,7 @@ print(split)
 ```
 
 ```{r}
-#How many registered voters compared to voter turnout by state and counties? 
+#How many registered voters compared to voter turnout by state? 
 
 pres_election_by_md_counties <- pres_election_by_md_counties|>
   rename(county = jurisdiction)
@@ -168,6 +168,23 @@ patterns <- patterns|>
 ```
 
 ```{r}
-#What senate election had the highest turnout by county? 
+#Which county had the highest turn out in the 2024 senate election?
+
+senate_by_county <- senate_by_county|>
+  mutate(angela_alsobrooks_democratic = as.numeric(parse_number(angela_alsobrooks_democratic)))|>
+  mutate(larry_hogan_republican = as.numeric(parse_number(larry_hogan_republican)))|>
+  mutate(mike_scott_libertarian = as.numeric(parse_number(mike_scott_libertarian)))|>
+  mutate(patrick_j_burke_write_in_other_candidates = as.numeric(parse_number(patrick_j_burke_write_in_other_candidates)))|>
+  mutate(billy_bridges_write_in_unaffiliated = as.numeric(parse_number(billy_bridges_write_in_unaffiliated)))|>
+  mutate(irwin_william_gibbs_write_in_unaffiliated = as.numeric(parse_number(irwin_william_gibbs_write_in_unaffiliated)))|>
+  mutate(christy_renee_helmondollar_write_in_unaffiliated = as.numeric(parse_number(christy_renee_helmondollar_write_in_unaffiliated)))|>
+  mutate(robin_rowe_write_in_unaffiliated = as.numeric(parse_number(robin_rowe_write_in_unaffiliated)))|>
+  mutate(other_write_ins = as.numeric(parse_number(other_write_ins)))
+
+
+senate_county_turnout <- senate_by_county|>
+  mutate(total= angela_alsobrooks_democratic + larry_hogan_republican + mike_scott_libertarian + patrick_j_burke_write_in_other_candidates + billy_bridges_write_in_unaffiliated + irwin_william_gibbs_write_in_unaffiliated + christy_renee_helmondollar_write_in_unaffiliated + robin_rowe_write_in_unaffiliated)|>
+  select(jurisdiction, total)|>
+  arrange(desc(total))
 
 ```
