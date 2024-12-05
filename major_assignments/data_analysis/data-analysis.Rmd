@@ -128,15 +128,24 @@ turnout_county <- turnout |>
 ```{r}
 #Based on current voting data, how might voting patterns in Maryland change in upcoming elections?
 elect_2008 <- elect_2008|>
-  select(party, percentage)
+  select(party, percentage)|>
+  mutate(percentage= as.numeric(parse_number(percentage)))
+
 elect_2012 <- elect_2012|>
-  select(party, percentage)
+  select(party, percentage)|>
+  mutate(percentage= as.numeric(parse_number(percentage)))
+
 elect_2016 <- elect_2016|>
-  select(party, percentage)
+  select(party, percentage)|>
+  mutate(percentage= as.numeric(parse_number(percentage)))
+
 elect_2020 <- elect_2020|>
-  select(party, percentage)
+  select(party, percentage)|>
+  mutate(percentage= as.numeric(parse_number(percentage)))
+
 elect_2024 <- md_pres_vice_data|>
-  select(party, percentage)
+  select(party, percentage)|>
+  mutate(percentage= as.numeric(parse_number(percentage)))
 
 
 patterns <- elect_2008 |>
@@ -151,7 +160,7 @@ patterns <- elect_2008 |>
   rename(elect_2024 = percentage)
 
 patterns <- patterns|>
-  mutate(prediction = elect_2008+elect_2012+elect_2016+elect_2020+elect_2024)
+  mutate(prediction = (elect_2008+elect_2012+elect_2016+elect_2020+elect_2024)/5)
   
   
 
