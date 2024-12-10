@@ -228,3 +228,5 @@ print(senate_county_turnout)
 ```
 
 **Answer:** Talbot county had the highest percentage of turnout in the senate race with 79.8% of registered voters actually participating in the election.
+
+LINK TO MEMO: <https://docs.google.com/document/d/1kSq-hLotrYrcJ27Y3cxEXUwfUgXYY-beyTrDz7zOGpo/edit?usp=sharing>
