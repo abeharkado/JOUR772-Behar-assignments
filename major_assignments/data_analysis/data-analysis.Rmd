@@ -19,6 +19,7 @@ library(tidyverse)
 library(janitor)
 library(lubridate)
 library(tidycensus)
+library(ggrepel)
 ```
 
 ## Loading data
@@ -84,10 +85,10 @@ print(split)
 
 ```
 
-**Answer:** We looked at the percentage of Democratic and Republican MD votes for the presidential and senate votes. We found that 64.3 percent of Democratic voters participated in the presidential election, while 55.6 percent Republicans voted in the presidential election. On the Senate, it was 55.6 percent for Democrat and 44.4 percent for the Republican.
+**Answer:** We looked at the percentage of Democratic and Republican MD votes for the presidential and senate votes. We found that 64.3 percent of Democratic voters participated in the presidential election, while 55.6 percent Republicans voted in the presidential election. On the Senate, it was 55.6 percent for Democrat and 44.4 percent for the Republican. Split tickets could have happened this year due to controversies surrounding the candidates. Due to how polarized the candidates were, some people decide to vote for one party for presidency and their party for senate versus remain consistent in party throughout the ticket. We think this may be a trend in the past three years.
 
 ```{r}
-#Question 2: How many registered voters compared to voter turnout by state? 
+#Question 2: How many registered voters compared to voter turnout by county? 
 
 pres_election_by_md_counties <- pres_election_by_md_counties|>
   rename(county = jurisdiction)
@@ -106,14 +107,14 @@ turnout <- pres_election_by_md_counties|>
 
 turnout <- turnout|>
   mutate(total_votes = democratic+republican+libertarian+green+unaffiliated)|>
-  mutate(diff= total - total_votes)
+  mutate(pct= (total_votes/total)*100)
 
-mean_value <- mean(turnout$diff, na.rm = TRUE)
+mean_value <- mean(turnout$pct, na.rm = TRUE)
 
 print(mean_value)
 ```
 
-**Answer:** 5,3469.25 was the average number of registered voters that turned out by county. 
+**Answer:** The average percent of registered voters that turned out by county was 73%. 
 
 ```{r}
 #Question 3: How does the voter turnout compare in counties with different political majorities? 
@@ -121,18 +122,20 @@ print(mean_value)
 turnout <- turnout|>
   mutate(
     win= case_when(
-    (democratic > republican) ~ "TRUE",
-    (democratic < republican) ~"FALSE"
+    (democratic > republican) ~ "dem win",
+    (democratic < republican) ~"rep win"
   ))
 
-turnout_county <- turnout |>
-  select(county, diff, win)|>
-  arrange(diff)
+turnout |>
+  group_by(win)|>
+  summarise(
+    party = mean(pct)
+  )
 
-print(turnout_county)
+
 ```
 
-**Answer:** Counties where there was a democratic win had a higher turnout than counties where there was a republican win.
+**Answer:** Counties where there was a republican win had a higher turnout with an average turnout of 75% over counties where there was a democratic win which stayed at 69%.
 
 ```{r}
 #Question 4: Based on current voting data, how might voting patterns in Maryland change in upcoming elections?
@@ -171,6 +174,28 @@ patterns <- elect_2008 |>
 patterns <- patterns|>
   mutate(prediction = (elect_2008+elect_2012+elect_2016+elect_2020+elect_2024)/5)
 
+
+election_patterns <- patterns|>
+  pivot_longer(cols = -party, names_to = "years", values_to = "values" ) |>
+  pivot_wider(names_from = party, values_from = values)|> clean_names()
+
+election_patterns|>
+  ggplot() + 
+  geom_point(aes(x=years, y= democratic, color= "DEM"))+
+  geom_smooth(aes(x=years, y=democratic), method="lm")+
+  geom_point(aes(x=years, y= republican, color="REP"))+
+  geom_smooth(aes(x=years, y=republican), method="lm")+
+  geom_point(aes(x=years, y= green, color="GREEN"))+ 
+  geom_smooth(aes(x=years, y= green), color="GREEN")+ 
+  geom_point(aes(x=years, y= libertarian, color="LIB"))+
+  geom_smooth(aes(x=years, y= libertarian, color="LIB"))+ 
+  labs(
+    title="Voting patterns in Maryland",
+    x = "years",
+    y = "votes",
+    colour ="Key"
+  )
+    
 print(patterns)
 ```
 
@@ -191,11 +216,15 @@ senate_by_county <- senate_by_county|>
 
 
 senate_county_turnout <- senate_by_county|>
-  mutate(total= angela_alsobrooks_democratic + larry_hogan_republican + mike_scott_libertarian + patrick_j_burke_write_in_other_candidates + billy_bridges_write_in_unaffiliated + irwin_william_gibbs_write_in_unaffiliated + christy_renee_helmondollar_write_in_unaffiliated + robin_rowe_write_in_unaffiliated)|>
-  select(jurisdiction, total)|>
-  arrange(desc(total))
+  mutate(total_votes= angela_alsobrooks_democratic + larry_hogan_republican + mike_scott_libertarian + patrick_j_burke_write_in_other_candidates + billy_bridges_write_in_unaffiliated + irwin_william_gibbs_write_in_unaffiliated + christy_renee_helmondollar_write_in_unaffiliated + robin_rowe_write_in_unaffiliated)|>
+  select(jurisdiction, total_votes)|>
+  rename(county=jurisdiction)|>
+  inner_join(voter_registration, by= "county")|>
+  mutate(pct = (total_votes/total)*100)|>
+  select(county, pct)|>
+  arrange(desc(pct))
 
 print(senate_county_turnout)
 ```
 
-**Answer:** Montgomery county had the highest turnout in the election with 48,504 voters total out of a total of 2,921,595.
+**Answer:** Talbot county had the highest percentage of turnout in the senate race with 79.8% of registered voters actually participating in the election.

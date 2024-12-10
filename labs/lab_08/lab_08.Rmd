@@ -159,29 +159,10 @@ Follow these steps:
 
 ```{r}
 
-md_absentee_ballots|>
-  ggplot() + 
-  geom_point(aes(x=dem_sent, y= dem_received, color= "Democrats"))+
-  geom_point(aes(x=rep_sent, y= rep_received, color= "Republicans"))+
-  geom_point(aes(x=oth_sent, y= oth_received, color= "Other"))+
-  geom_text_repel(aes(x = dem_sent, y = dem_received, label = county_name), 
-            color = "black", size=2)+
-  geom_text_repel(aes(x = rep_sent, y = rep_received, label = county_name),
-            color = "black", size=2)+
-  geom_text_repel(aes(x = oth_sent, y = oth_received, label = county_name),
-            color = "black", size=2)+
-  geom_smooth(aes(x = dem_sent, y = dem_received),method = lm, se= FALSE, color= "orange")+
-  geom_smooth(aes(x = rep_sent, y = rep_received),method = lm, se= FALSE, color= "blue")+
-  geom_smooth(aes(x = oth_sent, y = oth_received),method = lm, se= FALSE, color= "green")+
-  labs(
-    title="Absentee Ballots Per County",
-    x = "Sent",
-    y = "Received",
-    colour ="Key",
-    caption = "Source: Maryland State Board of Elections"
-)
-  
+
 ```
+
+\
 
 ```{r}
 md_absentee_ballots|>
